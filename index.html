@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CircuLab.id </title>
+    <!-- Memanggil React -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Memanggil Babel untuk menerjemahkan JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Memanggil Tailwind CSS langsung via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Memanggil Lucide Icons via CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        /* Agar tampilan meniru ukuran HP di layar komputer */
+        body {
+            background-color: #111827; 
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+        #root {
+            width: 100%;
+            max-width: 414px;
+            background-color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        /* Menyembunyikan scrollbar tapi tetap bisa scroll */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- DATA SIMULASI ---
+        const PRODUK_MARKETPLACE = [
+          { id: 1, nama: 'Tas Jinjing Kain Perca', harga: 'Rp 75.000', gambar: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=200', kategori: 'Fashion' },
+          { id: 2, nama: 'Pot Tanaman Daur Ulang', harga: 'Rp 45.000', gambar: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&q=80&w=200', kategori: 'Rumah' },
+          { id: 3, nama: 'Paving Block Plastik', harga: 'Rp 15.000/pc', gambar: 'https://images.unsplash.com/photo-1584839818828-568ea4658a8a?auto=format&fit=crop&q=80&w=200', kategori: 'Bangunan' },
+          { id: 4, nama: 'Dompet Denim Bekas', harga: 'Rp 50.000', gambar: 'https://images.unsplash.com/photo-1628151015968-3cae74880bb6?auto=format&fit=crop&q=80&w=200', kategori: 'Fashion' },
+        ];
+
+        const RIWAYAT_TRANSAKSI = [
+          { id: 1, tanggal: '12 Okt 2026', jenis: 'Kain Perca', berat: '15 Kg', status: 'Selesai Diproses' },
+          { id: 2, tanggal: '05 Nov 2026', jenis: 'Plastik Kemasan', berat: '8 Kg', status: 'Sedang Dijemput' },
+        ];
+
+        // --- KOMPONEN BANTUAN UNTUK IKON ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
+        };
+
+        const HeaderNavigasi = ({ judul, aksiKembali, ikonKanan }) => (
+          <div className="bg-white px-4 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              {aksiKembali && (
+                <button onClick={aksiKembali} className="p-1 rounded-full hover:bg-gray-100 text-gray-700 transition">
+                  <Icon name="chevron-left" />
+                </button>
+              )}
+              <h1 className="text-lg font-bold text-gray-800">{judul}</h1>
+            </div>
+            {ikonKanan && <div>{ikonKanan}</div>}
+          </div>
+        );
+
+        // =====================================================================
+        // HALAMAN REGISTRASI
+        // =====================================================================
+        const HalamanRegistrasi = ({ navigasiKe }) => {
+            return (
+                <div className="flex flex-col h-full bg-white px-6 py-10 justify-center">
+                    <div className="flex justify-center mb-8">
+                        <div className="bg-green-100 p-4 rounded-full shadow-inner border border-green-200">
+                            <Icon name="leaf" size={64} className="text-green-600" />
+                        </div>
+                    </div>
+                    <h1 className="text-3xl font-extrabold text-center text-green-700 mb-2 tracking-tight">CircuLab.id</h1>
+                    <p className="text-center text-gray-500 mb-8 text-sm px-4">Ubah limbah usaha Anda menjadi produk bernilai tinggi dan dukung ekonomi sirkular.</p>
+
+                    <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); navigasiKe('dashboard'); }}>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Bisnis UMKM</label>
+                            <input type="text" className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none transition" placeholder="Contoh: Batik Sejahtera" required />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Kategori Usaha</label>
+                            <select className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none bg-white transition" required>
+                                <option value="" disabled selected>Pilih Kategori...</option>
+                                <option value="fashion">Fashion & Konveksi</option>
+                                <option value="makanan">Makanan & Minuman</option>
+                                <option value="kerajinan">Kerajinan Tangan</option>
+                                <option value="lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Email Bisnis</label>
+                            <input type="email" className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none transition" placeholder="email@bisnis.com" required />
+                        </div>
+                        <button type="submit" className="w-full bg-green-600 text-white font-bold rounded-xl p-4 mt-8 hover:bg-green-700 transition-colors shadow-md">
+                            Daftar Sekarang
+                        </button>
+                    </form>
+                    <div className="mt-8 text-center bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <span className="text-sm text-gray-600">Sudah memiliki akun? </span>
+                        <button onClick={() => navigasiKe('dashboard')} className="text-sm text-green-700 font-bold hover:underline">Masuk</button>
+                    </div>
+                </div>
+            );
+        };
+
+        // =====================================================================
+        // HALAMAN PROFIL AKUN
+        // =====================================================================
+        const HalamanProfil = ({ navigasiKe, fotoProfil, setFotoProfil }) => {
+          const fileInputRef = useRef(null);
+
+          const handleFileChange = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+              const imageUrl = URL.createObjectURL(file);
+              setFotoProfil(imageUrl);
+            }
+          };
+
+          return (
+            <div className="flex flex-col h-full bg-gray-50 pb-20 overflow-y-auto">
+              <HeaderNavigasi judul="Profil Akun" aksiKembali={() => navigasiKe('dashboard')} />
+              
+              <div className="p-6">
+                <div className="flex justify-center mb-6 relative">
+                  <div className="w-28 h-28 bg-white rounded-full flex items-center justify-center text-green-700 font-bold text-4xl shadow-md border-4 border-green-50 relative overflow-hidden">
+                    {fotoProfil ? (
+                      <img src={fotoProfil} alt="Profil" className="w-full h-full object-cover" />
+                    ) : (
+                      "BS"
+                    )}
+                  </div>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    ref={fileInputRef} 
+                    onChange={handleFileChange} 
+                    className="hidden" 
+                  />
+                  <button 
+                    onClick={() => fileInputRef.current.click()}
+                    className="absolute bottom-0 right-1/2 transform translate-x-10 translate-y-2 bg-green-600 text-white p-2.5 rounded-full shadow-lg border-2 border-white hover:bg-green-700 transition active:scale-95"
+                  >
+                    <Icon name="camera" size={18} />
+                  </button>
+                </div>
+
+                <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">Batik Sejahtera</h2>
+
+                <div className="space-y-4">
+                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 focus-within:ring-2 ring-green-500 transition">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nama Bisnis UMKM</label>
+                    <input type="text" defaultValue="Batik Sejahtera" className="w-full text-sm font-bold text-gray-800 focus:outline-none bg-transparent" />
+                  </div>
+                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 focus-within:ring-2 ring-green-500 transition">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Kategori Usaha</label>
+                    <select className="w-full text-sm font-bold text-gray-800 focus:outline-none bg-transparent outline-none appearance-none">
+                      <option value="fashion">Fashion & Konveksi</option>
+                      <option value="makanan">Makanan & Minuman</option>
+                      <option value="kerajinan">Kerajinan Tangan</option>
+                      <option value="lainnya">Lainnya</option>
+                    </select>
+                  </div>
+                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 focus-within:ring-2 ring-green-500 transition">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Email Terdaftar</label>
+                    <input type="email" defaultValue="kontak@batiksejahtera.com" className="w-full text-sm font-bold text-gray-800 focus:outline-none bg-transparent" />
+                  </div>
+                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 focus-within:ring-2 ring-green-500 transition">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nomor WhatsApp</label>
+                    <input type="tel" defaultValue="+62 812 3456 7890" className="w-full text-sm font-bold text-gray-800 focus:outline-none bg-transparent" />
+                  </div>
+                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 focus-within:ring-2 ring-green-500 transition">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Alamat Operasional</label>
+                    <textarea defaultValue="Jl. Industri Kreatif No. 45, Komplek Sentra UMKM, Blok C, Kota Semarang, Jawa Tengah 50123" className="w-full text-sm font-medium text-gray-800 focus:outline-none resize-none h-20 bg-transparent"></textarea>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => { alert('Profil berhasil diperbarui!'); navigasiKe('dashboard'); }}
+                  className="w-full bg-green-600 text-white font-bold rounded-xl p-4 mt-8 hover:bg-green-700 transition shadow-md flex justify-center items-center gap-2"
+                >
+                  <Icon name="save" size={20} /> Simpan Perubahan
+                </button>
+                <button 
+                  onClick={() => navigasiKe('registrasi')} 
+                  className="w-full bg-red-50 text-red-600 font-bold rounded-xl p-4 mt-4 hover:bg-red-100 transition border border-red-100 flex justify-center items-center gap-2"
+                >
+                  <Icon name="log-out" size={20} /> Keluar Akun
+                </button>
+              </div>
+            </div>
+          );
+        };
+
+        // =====================================================================
+        // HALAMAN BERANDA
+        // =====================================================================
+        const HalamanBeranda = ({ navigasiKe, fotoProfil }) => (
+          <div className="flex flex-col h-full bg-gray-50 pb-20 overflow-y-auto relative">
+            <div className="bg-gradient-to-br from-green-600 to-green-800 px-6 pt-12 pb-8 rounded-b-3xl text-white shadow-lg relative overflow-hidden">
+              <div className="absolute top-4 right-4 text-white opacity-10"><Icon name="leaf" size={120} /></div>
+              <div 
+                className="flex justify-between items-center mb-6 relative z-10 cursor-pointer group"
+                onClick={() => navigasiKe('profil')}
+              >
+                <div>
+                  <p className="text-sm text-green-100 font-medium group-hover:text-white transition">Selamat datang kembali,</p>
+                  <h2 className="text-2xl font-bold flex items-center gap-2 group-hover:text-green-50 transition">
+                    Batik Sejahtera <Icon name="chevron-right" size={20} className="text-green-300 opacity-80 group-hover:opacity-100" />
+                  </h2>
+                </div>
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-green-700 font-bold shadow-md text-lg border-2 border-transparent group-hover:border-green-200 transition overflow-hidden">
+                    {fotoProfil ? <img src={fotoProfil} alt="Profil" className="w-full h-full object-cover" /> : "BS"}
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl p-5 flex items-center justify-between shadow-xl relative z-10">
+                <div>
+                  <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Limbah Terkelola</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-black text-green-600">125</span>
+                    <span className="text-sm font-bold text-gray-500">Kg</span>
+                  </div>
+                </div>
+                <div className="bg-green-50 p-4 rounded-full border border-green-100">
+                  <Icon name="recycle" size={36} className="text-green-500" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="px-6 py-6">
+              <h3 className="font-bold text-gray-800 mb-4 text-lg">Akses Cepat</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <button onClick={() => navigasiKe('setorLimbah')} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col items-center gap-3 hover:shadow-md transition">
+                  <div className="bg-green-100 p-3 rounded-full text-green-600"><Icon name="upload" /></div>
+                  <span className="text-xs font-bold text-gray-700 text-center">Setor Limbah</span>
+                </button>
+                <button onClick={() => navigasiKe('pelacakan')} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col items-center gap-3 hover:shadow-md transition">
+                  <div className="bg-blue-100 p-3 rounded-full text-blue-600"><Icon name="map-pin" /></div>
+                  <span className="text-xs font-bold text-gray-700 text-center">Lacak Status</span>
+                </button>
+                <button onClick={() => navigasiKe('laporan')} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col items-center gap-3 hover:shadow-md transition">
+                  <div className="bg-orange-100 p-3 rounded-full text-orange-600"><Icon name="bar-chart-2" /></div>
+                  <span className="text-xs font-bold text-gray-700 text-center">Laporan</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="px-6 mb-6">
+              <h3 className="font-bold text-gray-800 text-lg mb-4">Aktivitas Terakhir</h3>
+              <div className="space-y-3">
+                {RIWAYAT_TRANSAKSI.map(item => (
+                  <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex justify-between items-center cursor-pointer" onClick={() => navigasiKe('pelacakan')}>
+                    <div className="flex items-center gap-4">
+                      <div className="bg-gray-100 p-3 rounded-xl"><Icon name="package" className="text-gray-600" size={20}/></div>
+                      <div>
+                        <h4 className="font-bold text-sm text-gray-800">{item.jenis}</h4>
+                        <p className="text-xs text-gray-500 font-medium">{item.tanggal} • {item.berat}</p>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] px-3 py-1.5 rounded-full font-bold ${item.status.includes('Selesai') ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                      {item.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button 
+              onClick={() => navigasiKe('ai')} 
+              className="fixed bottom-24 right-4 sm:absolute sm:bottom-24 sm:right-6 bg-gradient-to-r from-emerald-400 to-green-600 text-white p-4 rounded-full shadow-[0_4px_15px_rgba(16,185,129,0.5)] hover:scale-105 transition-transform z-30 flex items-center justify-center animate-bounce"
+            >
+              <Icon name="bot" size={28} />
+            </button>
+          </div>
+        );
+
+        // =====================================================================
+        // HALAMAN AI KAMERA (TERINTEGRASI DENGAN GEMINI AI VISION)
+        // =====================================================================
+        const HalamanAI = ({ navigasiKe }) => {
+          const [pesanChat, setPesanChat] = useState([
+            { id: 1, sender: 'bot', text: 'Halo! Saya EcoBot. Silakan foto limbah Anda, lalu tanyakan kepada saya limbah tersebut cocok dijadikan produk apa!' }
+          ]);
+          const [inputTeks, setInputTeks] = useState('');
+          const [gambarTerlampir, setGambarTerlampir] = useState(null);
+          const [modeKamera, setModeKamera] = useState(false);
+          const [isTyping, setIsTyping] = useState(false);
+          const [kameraError, setKameraError] = useState(false);
+
+          const videoRef = useRef(null);
+          const streamRef = useRef(null);
+          const chatEndRef = useRef(null);
+
+          // Auto-scroll ke bawah
+          useEffect(() => {
+            chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+          }, [pesanChat, isTyping, gambarTerlampir]);
+
+          const bukaKamera = async () => {
+            setModeKamera(true);
+            try {
+              const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment" } 
+              });
+              streamRef.current = stream;
+              if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+              }
+              setKameraError(false);
+            } catch (err) {
+              console.error("Gagal mengakses kamera: ", err);
+              setKameraError(true);
+            }
+          };
+
+          const tutupKamera = () => {
+            if (streamRef.current) {
+              streamRef.current.getTracks().forEach(track => track.stop());
+            }
+            setModeKamera(false);
+          };
+
+          const ambilFoto = () => {
+            if (videoRef.current) {
+              const canvas = document.createElement('canvas');
+              canvas.width = videoRef.current.videoWidth;
+              canvas.height = videoRef.current.videoHeight;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+              const imageUrl = canvas.toDataURL('image/jpeg'); // Menggunakan JPEG untuk ukuran lebih efisien
+              
+              tutupKamera();
+              setGambarTerlampir(imageUrl);
+            }
+          };
+
+          // FUNGSI UNTUK MEMANGGIL GEMINI API
+          const panggilGeminiAPI = async (teksPrompt, gambarBase64) => {
+            const apiKey = ""; /const apiKey = "AIzaSyBse71uhbqALNUbtBlOORUGyzJiQObnCi4";/
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const parts = [];
+            // Masukkan teks ke dalam parts
+            if (teksPrompt) {
+              parts.push({ text: teksPrompt });
+            } else {
+              parts.push({ text: "Analisis gambar limbah ini. Bisa didaur ulang menjadi apa saja? Berapa perkiraan nilai jualnya?" });
+            }
+
+            // Masukkan gambar ke dalam parts jika ada
+            if (gambarBase64) {
+              const base64Data = gambarBase64.split(',')[1];
+              const mimeType = gambarBase64.substring(gambarBase64.indexOf(':') + 1, gambarBase64.indexOf(';')) || "image/jpeg";
+              parts.push({
+                inlineData: { mimeType: mimeType, data: base64Data }
+              });
+            }
+
+            const payload = {
+              contents: [{ role: "user", parts: parts }],
+              systemInstruction: {
+                parts: [{ text: "Kamu adalah EcoBot, pakar daur ulang dan asisten AI di aplikasi EcoVia. Tugasmu adalah menganalisis gambar limbah atau menjawab pertanyaan tentang daur ulang. Berikan rekomendasi 2-3 produk kreatif dan bernilai ekonomi tinggi yang bisa dibuat dari limbah tersebut, estimasi harga jualnya, dan cara singkat mengolahnya. Jawablah dengan bahasa Indonesia yang ramah, profesional, ringkas, dan jelas. Hindari format markdown rumit." }]
+              }
+            };
+
+            // Implementasi Retry dengan Exponential Backoff untuk keandalan API
+            const retries = [1000, 2000, 4000, 8000];
+            for (let i = 0; i <= retries.length; i++) {
+              try {
+                const response = await fetch(url, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const result = await response.json();
+                return result.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, saya tidak mengerti limbah tersebut.";
+              } catch (error) {
+                if (i === retries.length) {
+                  console.error("API Error:", error);
+                  return "Maaf, server AI sedang sibuk. Silakan coba lagi beberapa saat lagi.";
+                }
+                await new Promise(resolve => setTimeout(resolve, retries[i]));
+              }
+            }
+          };
+
+          const kirimPesan = async () => {
+            if (!inputTeks.trim() && !gambarTerlampir) return;
+
+            const teksDikirim = inputTeks;
+            const gambarDikirim = gambarTerlampir;
+
+            const pesanBaru = { id: Date.now(), sender: 'user', text: teksDikirim, image: gambarDikirim };
+            setPesanChat(prev => [...prev, pesanBaru]);
+            
+            setInputTeks('');
+            setGambarTerlampir(null);
+            setIsTyping(true); // Memunculkan indikator "Sedang mengetik..."
+
+            // Panggil AI Gemin Vision secara Async
+            const balasanAI = await panggilGeminiAPI(teksDikirim, gambarDikirim);
+
+            // Tampilkan jawaban AI
+            setPesanChat(prev => [...prev, { id: Date.now() + 1, sender: 'bot', text: balasanAI }]);
+            setIsTyping(false);
+          };
+
+          useEffect(() => {
+            return () => {
+              if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop());
+              }
+            };
+          }, []);
+
+          return (
+            <div className="flex flex-col h-full bg-gray-50 pb-safe">
+              <HeaderNavigasi judul="EcoBot AI" aksiKembali={() => navigasiKe('dashboard')} />
+
+              {!modeKamera ? (
+                /* RUANG OBROLAN (CHAT INTERFACE) */
+                <div className="flex flex-col flex-1 h-full overflow-hidden relative">
+                  <div className="flex-1 p-4 overflow-y-auto space-y-4 pb-32">
+                    {pesanChat.map((p) => (
+                      <div key={p.id} className={`flex ${p.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[85%] p-3.5 rounded-2xl shadow-sm ${p.sender === 'user' ? 'bg-green-600 text-white rounded-br-none' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'}`}>
+                          {p.image && <img src={p.image} className="w-full rounded-xl mb-3 object-cover max-h-48 border border-white/20" alt="Foto Limbah" />}
+                          {p.text && <p className="text-sm leading-relaxed whitespace-pre-wrap">{p.text}</p>}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Animasi Mengetik AI */}
+                    {isTyping && (
+                      <div className="flex justify-start">
+                        <div className="bg-white border border-gray-200 p-4 rounded-2xl rounded-bl-none shadow-sm flex gap-1.5 items-center">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{animationDelay: '0.15s'}}></div>
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={chatEndRef}></div>
+                  </div>
+
+                  {/* Area Input Bawah */}
+                  <div className="absolute bottom-0 w-full bg-white border-t border-gray-200 flex flex-col z-10">
+                    
+                    {/* Preview Gambar Terlampir */}
+                    {gambarTerlampir && (
+                      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center shadow-inner">
+                        <div className="relative inline-block">
+                          <img src={gambarTerlampir} className="h-16 w-16 object-cover rounded-xl border-2 border-green-500 shadow-sm" alt="Lampiran" />
+                          <button 
+                            onClick={() => setGambarTerlampir(null)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition"
+                          >
+                            <Icon name="x" size={12} />
+                          </button>
+                        </div>
+                        <span className="text-xs text-gray-500 font-medium ml-3 italic">Foto terlampir, tanyakan sesuatu...</span>
+                      </div>
+                    )}
+
+                    {/* Baris Ketik Chat */}
+                    <div className="p-3 flex items-center gap-2">
+                      <button 
+                          onClick={bukaKamera} 
+                          className="p-3 bg-gray-100 text-gray-600 rounded-full hover:bg-green-100 hover:text-green-600 transition shadow-sm border border-gray-200"
+                      >
+                        <Icon name="camera" size={20} />
+                      </button>
+                      <input 
+                        type="text" 
+                        value={inputTeks}
+                        onChange={(e) => setInputTeks(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && kirimPesan()}
+                        placeholder={gambarTerlampir ? "Tanyakan sesuatu tentang foto ini..." : "Ketik pesan..."}
+                        className="flex-1 bg-gray-100 border border-transparent rounded-full py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition"
+                        disabled={isTyping}
+                      />
+                      <button 
+                          onClick={kirimPesan} 
+                          disabled={(!inputTeks.trim() && !gambarTerlampir) || isTyping}
+                          className={`p-3 rounded-full transition shadow-sm ${(!inputTeks.trim() && !gambarTerlampir) || isTyping ? 'bg-gray-200 text-gray-400' : 'bg-green-600 text-white hover:bg-green-700'}`}
+                      >
+                        <Icon name="send" size={18} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* MODE KAMERA FULLSCREEN */
+                <div className="flex-1 bg-black flex flex-col relative z-50">
+                  <button onClick={tutupKamera} className="absolute top-4 left-4 z-20 bg-black/50 text-white p-2 rounded-full backdrop-blur-sm">
+                    <Icon name="x" size={24} />
+                  </button>
+
+                  <div className="flex-1 relative overflow-hidden flex items-center justify-center">
+                    {kameraError ? (
+                      <div className="text-white text-center p-6">
+                        <Icon name="camera-off" size={48} className="mx-auto mb-4 opacity-50" />
+                        <p className="text-sm">Kamera tidak dapat diakses. Mohon izinkan akses kamera di browser Anda.</p>
+                      </div>
+                    ) : (
+                      <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover"></video>
+                    )}
+                    
+                    {!kameraError && (
+                      <React.Fragment>
+                          <div className="absolute inset-0 border-2 border-dashed border-green-500/60 m-10 rounded-3xl pointer-events-none"></div>
+                          <div className="absolute top-0 left-0 w-full h-1 bg-green-500/80 shadow-[0_0_20px_rgba(34,197,94,1)] animate-[pulse_2s_ease-in-out_infinite]" style={{top: '50%'}}></div>
+                      </React.Fragment>
+                    )}
+                  </div>
+
+                  <div className="h-32 bg-black flex items-center justify-center pb-4">
+                    <button 
+                        onClick={ambilFoto} 
+                        disabled={kameraError} 
+                        className={`w-20 h-20 rounded-full border-[5px] ${kameraError ? 'border-gray-600' : 'border-green-500'} flex items-center justify-center transition active:scale-95`}
+                    >
+                      <div className={`w-14 h-14 rounded-full ${kameraError ? 'bg-gray-600' : 'bg-white'}`}></div>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        // =====================================================================
+        // HALAMAN MARKETPLACE
+        // =====================================================================
+        const HalamanMarketplace = ({ navigasiKe, setProdukTerpilih }) => (
+          <div className="flex flex-col h-full bg-gray-50 pb-20">
+            <HeaderNavigasi judul="Pasar Daur Ulang" ikonKanan={<Icon name="shopping-bag" />} />
+            <div className="px-4 py-4 bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"><Icon name="search" size={18}/></div>
+                <input type="text" placeholder="Cari material atau produk..." className="w-full bg-gray-100 border border-gray-200 rounded-full py-2.5 pl-10 pr-4 text-sm font-medium focus:outline-none" />
+              </div>
+            </div>
+            <div className="p-4 grid grid-cols-2 gap-4 overflow-y-auto">
+              {PRODUK_MARKETPLACE.map(produk => (
+                <div key={produk.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+                  <div className="h-36 w-full relative">
+                    <img src={produk.gambar} alt={produk.nama} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="p-3 flex flex-col flex-1">
+                    <h4 className="text-sm font-bold text-gray-800 leading-tight mb-2 flex-1">{produk.nama}</h4>
+                    <p className="text-sm font-black text-green-600 mb-3">{produk.harga}</p>
+                    
+                    <button 
+                        onClick={() => { setProdukTerpilih(produk); navigasiKe('detailProduk'); }} 
+                        className="mb-2 w-full flex items-center justify-center gap-1.5 text-[10px] font-bold text-blue-700 bg-blue-50 py-2 rounded-xl border border-blue-200 hover:bg-blue-100 transition shadow-sm"
+                    >
+                        <Icon name="link" size={12} className="text-blue-600"/> Lacak Blockchain
+                    </button>
+
+                    <button className="mt-auto w-full border-2 border-gray-900 text-gray-900 bg-white text-xs font-bold py-2 rounded-xl hover:bg-gray-900 hover:text-white transition">Beli</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+        // =====================================================================
+        // HALAMAN DETAIL PRODUK BLOCKCHAIN
+        // =====================================================================
+        const HalamanDetailProduk = ({ produk, navigasiKe }) => {
+            if (!produk) return null;
+            return (
+              <div className="flex flex-col h-full bg-gray-50 pb-20 overflow-y-auto">
+                <HeaderNavigasi judul="Detail & Transparansi" aksiKembali={() => navigasiKe('marketplace')} />
+                <div className="p-4">
+                  <img src={produk.gambar} alt={produk.nama} className="w-full h-56 object-cover rounded-3xl shadow-md mb-5" />
+                  
+                  <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-5">
+                    <div className="inline-block px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full mb-2 uppercase">{produk.kategori}</div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-1">{produk.nama}</h2>
+                    <p className="text-green-600 font-black text-xl">{produk.harga}</p>
+                  </div>
+
+                  <div className="bg-gradient-to-b from-blue-50 to-white rounded-3xl shadow-sm border border-blue-100 p-6">
+                    <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                        <Icon name="link" className="text-blue-600" /> Jejak Blockchain
+                    </h3>
+                    <p className="text-[11px] text-gray-500 mb-6 leading-relaxed">Keaslian material produk ini dijamin melalui kontrak pintar <i>(smart contract)</i>. Setiap tahapan dicatat secara permanen dan tidak dapat diubah.</p>
+                    
+                    <div className="relative pl-6 space-y-7 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-blue-200">
+                      <div className="relative">
+                        <div className="absolute -left-[30px] bg-blue-500 rounded-full w-6 h-6 border-4 border-white flex items-center justify-center shadow-md">
+                          <Icon name="check" size={12} className="text-white" />
+                        </div>
+                        <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                          <h5 className="font-bold text-xs text-gray-800">1. Limbah Disetor</h5>
+                          <p className="text-[9px] font-mono text-gray-400 mt-1 mb-1 bg-gray-50 px-2 py-0.5 rounded break-all">Tx: 0x8f4d92a1b9c23e84...</p>
+                          <p className="text-[11px] text-gray-600">Oleh: UMKM Batik Sejahtera</p>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute -left-[30px] bg-blue-500 rounded-full w-6 h-6 border-4 border-white flex items-center justify-center shadow-md">
+                          <Icon name="check" size={12} className="text-white" />
+                        </div>
+                        <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                          <h5 className="font-bold text-xs text-gray-800">2. Pemrosesan Daur Ulang</h5>
+                          <p className="text-[9px] font-mono text-gray-400 mt-1 mb-1 bg-gray-50 px-2 py-0.5 rounded break-all">Tx: 0x3c2e19d4f8a7b6c5...</p>
+                          <p className="text-[11px] text-gray-600">Oleh: Fasilitas EcoVia Hub</p>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute -left-[30px] bg-green-500 rounded-full w-6 h-6 border-4 border-white flex items-center justify-center shadow-md">
+                          <Icon name="check" size={12} className="text-white" />
+                        </div>
+                        <div className="bg-green-50 p-3 rounded-xl border border-green-100 shadow-sm">
+                          <h5 className="font-bold text-xs text-green-800">3. Produk Selesai</h5>
+                          <p className="text-[9px] font-mono text-green-600/70 mt-1 mb-1 bg-green-100/50 px-2 py-0.5 rounded break-all">Tx: 0x9a1b8f72c3d4e5f6...</p>
+                          <p className="text-[11px] text-green-700 font-semibold">Tervalidasi 100% material daur ulang</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+        };
+
+        // =====================================================================
+        // HALAMAN LAINNYA
+        // =====================================================================
+        const HalamanSetorLimbah = ({ navigasiKe }) => (
+          <div className="flex flex-col h-full bg-white pb-20">
+            <HeaderNavigasi judul="Setor Limbah Baru" aksiKembali={() => navigasiKe('dashboard')} />
+            <div className="p-6 overflow-y-auto">
+              <div className="border-2 border-dashed border-green-400 rounded-2xl h-48 flex flex-col items-center justify-center bg-green-50 mb-6 cursor-pointer">
+                 <Icon name="upload" size={36} className="text-green-600 mb-3" />
+                 <p className="text-sm font-bold text-green-800">Ketuk untuk Unggah Foto</p>
+                 <p className="text-xs text-green-600/70 mt-1">Format JPG/PNG, Maks 5MB</p>
+              </div>
+              <form className="space-y-5">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1.5">Kategori Limbah</label>
+                  <select className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-green-500 bg-white">
+                    <option>Kain Sisa / Perca</option>
+                    <option>Plastik Kemasan / Botol</option>
+                    <option>Kardus / Kertas Bekas</option>
+                  </select>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Jumlah</label>
+                    <input type="number" className="w-full border border-gray-300 rounded-xl p-3" placeholder="10" />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Satuan</label>
+                    <select className="w-full border border-gray-300 rounded-xl p-3 bg-white">
+                      <option>Kilogram (Kg)</option>
+                      <option>Pcs</option>
+                    </select>
+                  </div>
+                </div>
+              </form>
+              <button onClick={() => navigasiKe('jadwal')} className="w-full bg-green-600 text-white font-bold rounded-xl p-4 mt-8 shadow-md text-lg">
+                Pilih Jadwal Penjemputan
+              </button>
+            </div>
+          </div>
+        );
+
+        const HalamanJadwal = ({ navigasiKe }) => (
+          <div className="flex flex-col h-full bg-gray-50 pb-20">
+            <HeaderNavigasi judul="Atur Penjemputan" aksiKembali={() => navigasiKe('setorLimbah')} />
+            <div className="p-6 overflow-y-auto space-y-6">
+              <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200">
+                <div className="flex items-start gap-4">
+                  <div className="bg-red-50 p-3 rounded-full mt-1 border border-red-100">
+                    <Icon name="map-pin" className="text-red-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase">Alamat Pengambilan</h4>
+                    <p className="text-sm font-bold text-gray-800">Gudang Produksi Batik Sejahtera</p>
+                    <p className="text-xs text-gray-500 mt-1">Jl. Industri Kreatif No. 45, Kota Semarang</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                 <h4 className="font-bold text-gray-800 mb-3 text-sm flex items-center gap-2"><Icon name="calendar" size={18} className="text-green-600" /> Tentukan Tanggal</h4>
+                 <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    <div className="min-w-[70px] p-4 rounded-2xl flex flex-col items-center justify-center border-2 bg-green-600 border-green-600 text-white shadow-md">
+                      <span className="text-xs font-semibold mb-1">Sen</span>
+                      <span className="text-xl font-black">15</span>
+                    </div>
+                    <div className="min-w-[70px] p-4 rounded-2xl flex flex-col items-center justify-center border-2 bg-white border-gray-200 text-gray-600">
+                      <span className="text-xs font-semibold mb-1">Sel</span>
+                      <span className="text-xl font-black">16</span>
+                    </div>
+                 </div>
+              </div>
+              <div className="bg-gray-100 p-5 rounded-2xl border border-gray-200 mt-6">
+                <h4 className="font-bold text-gray-800 text-sm border-b border-gray-200 pb-2 mb-3">Ringkasan Penjemputan</h4>
+                <div className="flex justify-between items-center text-sm mb-2"><span className="text-gray-500">Estimasi Berat</span><span className="font-bold text-gray-800">10 Kg</span></div>
+                <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-200"><span className="text-gray-500">Biaya Layanan</span><span className="font-black text-green-600">Gratis</span></div>
+              </div>
+              <button onClick={() => { alert('Penjemputan Dikonfirmasi!'); navigasiKe('pelacakan'); }} className="w-full bg-gray-900 text-white font-bold rounded-xl p-4 shadow-lg text-lg">
+                Konfirmasi Pesanan
+              </button>
+            </div>
+          </div>
+        );
+
+        const HalamanPelacakan = ({ navigasiKe }) => (
+          <div className="flex flex-col h-full bg-gray-50 pb-20">
+            <HeaderNavigasi judul="Status Pengolahan" aksiKembali={() => navigasiKe('dashboard')} />
+            <div className="p-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-8">
+                <div className="flex justify-between items-start mb-4 border-b border-gray-100 pb-3">
+                  <div>
+                    <p className="text-xs text-gray-500 font-bold uppercase">No. Referensi</p>
+                    <p className="text-sm font-black text-gray-800 tracking-wide">#WP-882910</p>
+                  </div>
+                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">Sedang Diproses</span>
+                </div>
+                <h3 className="font-bold text-xl text-gray-800">10 Kg Kain Perca</h3>
+              </div>
+              <h4 className="font-bold text-gray-800 mb-6 text-lg">Perjalanan Limbah Anda</h4>
+              <div className="relative pl-6 space-y-8 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gray-200">
+                <div className="relative">
+                  <div className="absolute -left-[30px] bg-green-500 rounded-full w-6 h-6 border-4 border-white flex items-center justify-center shadow-md">
+                    <Icon name="check-circle-2" size={12} className="text-white" />
+                  </div>
+                  <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm ml-2">
+                    <h5 className="font-bold text-sm text-gray-800">Tiba di Fasilitas EcoVia</h5>
+                    <p className="text-xs text-gray-500 mt-1">15 Okt 2026, 14:30 WIB</p>
+                  </div>
+                </div>
+                <div className="relative">
+                   <div className="absolute -left-[30px] bg-blue-500 rounded-full w-6 h-6 border-4 border-white flex items-center justify-center shadow-md">
+                     <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                  <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100 shadow-sm ml-2">
+                    <h5 className="font-bold text-sm text-blue-700">Proses Sortir & Daur Ulang</h5>
+                    <p className="text-xs text-blue-500 mt-1">16 Okt 2026, 09:00 WIB - Sekarang</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+        const HalamanLaporan = () => (
+          <div className="flex flex-col h-full bg-white pb-20 overflow-y-auto">
+            <HeaderNavigasi judul="Laporan & Dampak" />
+            <div className="p-6">
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="bg-green-50 p-4 rounded-2xl border border-green-200">
+                  <p className="text-xs text-green-800 font-bold mb-1">Limbah Terdaur Ulang</p>
+                  <p className="text-3xl font-black text-green-700">345 <span className="text-sm font-bold">Kg</span></p>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-2xl border border-blue-200">
+                  <p className="text-xs text-blue-800 font-bold mb-1">Pengurangan Emisi</p>
+                  <p className="text-3xl font-black text-blue-700">80 <span className="text-sm font-bold">Kg</span></p>
+                </div>
+              </div>
+              <h3 className="font-bold text-gray-800 mb-4 text-lg">Komposisi Material</h3>
+              <div className="space-y-4">
+                <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <div className="flex justify-between mb-1"><span className="text-sm font-bold">Kain Perca</span><span className="text-sm font-black text-orange-600">65%</span></div>
+                    <div className="w-full bg-gray-100 rounded-full h-2.5"><div className="bg-orange-500 h-2.5 rounded-full" style={{ width: '65%' }}></div></div>
+                </div>
+                <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <div className="flex justify-between mb-1"><span className="text-sm font-bold">Plastik</span><span className="text-sm font-black text-blue-600">35%</span></div>
+                    <div className="w-full bg-gray-100 rounded-full h-2.5"><div className="bg-blue-500 h-2.5 rounded-full" style={{ width: '35%' }}></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+        const HalamanPenghargaan = () => (
+          <div className="flex flex-col h-full bg-gray-50 pb-20 overflow-y-auto">
+            <HeaderNavigasi judul="Penghargaan" />
+            <div className="p-6">
+              <div className="bg-white p-2.5 rounded-[2rem] shadow-lg border border-gray-200 mb-8">
+                <div className="border-[6px] border-double border-green-200 p-8 rounded-3xl flex flex-col items-center text-center bg-gradient-to-b from-white to-green-50">
+                  <div className="bg-green-100 p-3 rounded-full mb-3"><Icon name="award" size={40} className="text-green-600" /></div>
+                  <p className="text-[10px] font-black text-green-700 tracking-widest uppercase mb-6">Sertifikat Keberlanjutan 2026</p>
+                  <h2 className="text-2xl font-serif font-black text-gray-900 mb-4 border-b-2 border-green-200 pb-2">Batik Sejahtera</h2>
+                  <div className="bg-green-600 px-5 py-2 rounded-full text-white font-bold text-xs mt-4">Total: 345 Kg Limbah</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+        // =====================================================================
+        // KOMPONEN UTAMA (APP)
+        // =====================================================================
+        const App = () => {
+          const [halamanAktif, setHalamanAktif] = useState('registrasi');
+          const [produkTerpilih, setProdukTerpilih] = useState(null);
+          const [fotoProfil, setFotoProfil] = useState(null);
+
+          const gantiHalaman = (namaHalaman) => {
+            setHalamanAktif(namaHalaman);
+            window.scrollTo(0, 0); 
+          };
+
+          // Re-render ikon Lucide
+          useEffect(() => {
+            lucide.createIcons();
+          }, [halamanAktif, fotoProfil]);
+
+          const menuBawah = [
+            { id: 'dashboard', ikon: 'home', label: 'Beranda' },
+            { id: 'marketplace', ikon: 'shopping-bag', label: 'Pasar' },
+            { id: 'setorLimbah', ikon: 'recycle', label: 'Setor', spesial: true },
+            { id: 'laporan', ikon: 'bar-chart-2', label: 'Laporan' },
+            { id: 'penghargaan', ikon: 'award', label: 'Reward' },
+          ];
+
+          // Daftar halaman yang tidak menampilkan navigasi bawah
+          const sembunyikanMenuBawah = ['registrasi', 'jadwal', 'pelacakan', 'setorLimbah', 'ai', 'detailProduk', 'profil'].includes(halamanAktif);
+
+          return (
+            <React.Fragment>
+              <div className="flex-1 overflow-hidden relative">
+                {halamanAktif === 'registrasi' && <HalamanRegistrasi navigasiKe={gantiHalaman} />}
+                {halamanAktif === 'dashboard' && <HalamanBeranda navigasiKe={gantiHalaman} fotoProfil={fotoProfil} />}
+                {halamanAktif === 'setorLimbah' && <HalamanSetorLimbah navigasiKe={gantiHalaman} />}
+                {halamanAktif === 'jadwal' && <HalamanJadwal navigasiKe={gantiHalaman} />}
+                {halamanAktif === 'pelacakan' && <HalamanPelacakan navigasiKe={gantiHalaman} />}
+                {halamanAktif === 'marketplace' && <HalamanMarketplace navigasiKe={gantiHalaman} setProdukTerpilih={setProdukTerpilih} />}
+                {halamanAktif === 'laporan' && <HalamanLaporan />}
+                {halamanAktif === 'penghargaan' && <HalamanPenghargaan />}
+                {halamanAktif === 'ai' && <HalamanAI navigasiKe={gantiHalaman} />}
+                {halamanAktif === 'detailProduk' && <HalamanDetailProduk produk={produkTerpilih} navigasiKe={gantiHalaman} />}
+                {halamanAktif === 'profil' && <HalamanProfil navigasiKe={gantiHalaman} fotoProfil={fotoProfil} setFotoProfil={setFotoProfil} />}
+              </div>
+
+              {!sembunyikanMenuBawah && (
+                <div className="absolute bottom-0 w-full bg-white border-t border-gray-200 px-2 pt-2 pb-4 flex justify-around items-end z-20">
+                  {menuBawah.map((item) => (
+                    <button 
+                      key={item.id} 
+                      onClick={() => gantiHalaman(item.id)}
+                      className={`flex flex-col items-center p-2 w-16 transition-colors ${halamanAktif === item.id || (halamanAktif==='detailProduk' && item.id==='marketplace') ? 'text-green-600' : 'text-gray-400'}`}
+                    >
+                      {item.spesial ? (
+                        <div className="bg-green-600 text-white p-3.5 rounded-full shadow-lg transform -translate-y-5 border-4 border-white">
+                          <Icon name={item.ikon} size={26} />
+                        </div>
+                      ) : (
+                         <Icon name={item.ikon} size={24} />
+                      )}
+                      <span className={`text-[10px] mt-1 ${item.spesial ? 'mt-0 font-bold text-green-700' : 'font-semibold'}`}>
+                        {item.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </React.Fragment>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
