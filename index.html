@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CircuLab.id </title>
+    <title>EcoVia App</title>
     <!-- Memanggil React -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -86,21 +86,45 @@
         // =====================================================================
         // HALAMAN REGISTRASI
         // =====================================================================
-        const HalamanRegistrasi = ({ navigasiKe }) => {
+        const HalamanRegistrasi = ({ navigasiKe, setNamaBisnis }) => {
+            const [inputNama, setInputNama] = useState('');
+            
+            // 👇👇👇 MASUKKAN LINK URL ATAU PATH GAMBAR LOGO ANDA DI BAWAH INI 👇👇👇
+            const urlLogoAplikasi = "logo.png"; 
+            // 👆👆👆 ========================================================= 👆👆👆
+
+            const handleDaftar = (e) => {
+                e.preventDefault();
+                if(inputNama.trim() !== '') {
+                    setNamaBisnis(inputNama);
+                }
+                navigasiKe('dashboard');
+            };
+
             return (
                 <div className="flex flex-col h-full bg-white px-6 py-10 justify-center">
-                    <div className="flex justify-center mb-8">
-                        <div className="bg-green-100 p-4 rounded-full shadow-inner border border-green-200">
-                            <Icon name="leaf" size={64} className="text-green-600" />
-                        </div>
+                    <div className="flex justify-center mb-4">
+                        {/* Tag ini menampilkan logo Anda menjadi bentuk bulat sempurna (rounded-full) */}
+                        <img 
+                            src={urlLogoAplikasi} 
+                            alt="Logo CircuLab" 
+                            className="h-24 w-24 object-cover rounded-full shadow-md border-2 border-green-100" 
+                        />
                     </div>
                     <h1 className="text-3xl font-extrabold text-center text-green-700 mb-2 tracking-tight">CircuLab.id</h1>
                     <p className="text-center text-gray-500 mb-8 text-sm px-4">Ubah limbah usaha Anda menjadi produk bernilai tinggi dan dukung ekonomi sirkular.</p>
 
-                    <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); navigasiKe('dashboard'); }}>
+                    <form className="space-y-4" onSubmit={handleDaftar}>
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Bisnis UMKM</label>
-                            <input type="text" className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none transition" placeholder="Contoh: Batik Sejahtera" required />
+                            <input 
+                                type="text" 
+                                value={inputNama}
+                                onChange={(e) => setInputNama(e.target.value)}
+                                className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none transition" 
+                                placeholder="Contoh: Batik Sejahtera" 
+                                required 
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1">Kategori Usaha</label>
@@ -131,7 +155,7 @@
         // =====================================================================
         // HALAMAN PROFIL AKUN
         // =====================================================================
-        const HalamanProfil = ({ navigasiKe, fotoProfil, setFotoProfil }) => {
+        const HalamanProfil = ({ navigasiKe, fotoProfil, setFotoProfil, namaBisnis, setNamaBisnis }) => {
           const fileInputRef = useRef(null);
 
           const handleFileChange = (event) => {
@@ -152,7 +176,7 @@
                     {fotoProfil ? (
                       <img src={fotoProfil} alt="Profil" className="w-full h-full object-cover" />
                     ) : (
-                      "BS"
+                      namaBisnis.charAt(0).toUpperCase()
                     )}
                   </div>
                   <input 
@@ -170,12 +194,17 @@
                   </button>
                 </div>
 
-                <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">Batik Sejahtera</h2>
+                <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">{namaBisnis}</h2>
 
                 <div className="space-y-4">
                   <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 focus-within:ring-2 ring-green-500 transition">
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nama Bisnis UMKM</label>
-                    <input type="text" defaultValue="Batik Sejahtera" className="w-full text-sm font-bold text-gray-800 focus:outline-none bg-transparent" />
+                    <input 
+                        type="text" 
+                        value={namaBisnis} 
+                        onChange={(e) => setNamaBisnis(e.target.value)} 
+                        className="w-full text-sm font-bold text-gray-800 focus:outline-none bg-transparent" 
+                    />
                   </div>
                   <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 focus-within:ring-2 ring-green-500 transition">
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Kategori Usaha</label>
@@ -188,7 +217,7 @@
                   </div>
                   <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 focus-within:ring-2 ring-green-500 transition">
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Email Terdaftar</label>
-                    <input type="email" defaultValue="kontak@batiksejahtera.com" className="w-full text-sm font-bold text-gray-800 focus:outline-none bg-transparent" />
+                    <input type="email" defaultValue="kontak@bisnis.com" className="w-full text-sm font-bold text-gray-800 focus:outline-none bg-transparent" />
                   </div>
                   <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 focus-within:ring-2 ring-green-500 transition">
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nomor WhatsApp</label>
@@ -196,7 +225,7 @@
                   </div>
                   <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 focus-within:ring-2 ring-green-500 transition">
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Alamat Operasional</label>
-                    <textarea defaultValue="Jl. Industri Kreatif No. 45, Komplek Sentra UMKM, Blok C, Kota Semarang, Jawa Tengah 50123" className="w-full text-sm font-medium text-gray-800 focus:outline-none resize-none h-20 bg-transparent"></textarea>
+                    <textarea defaultValue="Jl. Industri Kreatif No. 45, Komplek Sentra UMKM, Kota Semarang" className="w-full text-sm font-medium text-gray-800 focus:outline-none resize-none h-20 bg-transparent"></textarea>
                   </div>
                 </div>
 
@@ -220,7 +249,7 @@
         // =====================================================================
         // HALAMAN BERANDA
         // =====================================================================
-        const HalamanBeranda = ({ navigasiKe, fotoProfil }) => (
+        const HalamanBeranda = ({ navigasiKe, fotoProfil, namaBisnis }) => (
           <div className="flex flex-col h-full bg-gray-50 pb-20 overflow-y-auto relative">
             <div className="bg-gradient-to-br from-green-600 to-green-800 px-6 pt-12 pb-8 rounded-b-3xl text-white shadow-lg relative overflow-hidden">
               <div className="absolute top-4 right-4 text-white opacity-10"><Icon name="leaf" size={120} /></div>
@@ -231,11 +260,11 @@
                 <div>
                   <p className="text-sm text-green-100 font-medium group-hover:text-white transition">Selamat datang kembali,</p>
                   <h2 className="text-2xl font-bold flex items-center gap-2 group-hover:text-green-50 transition">
-                    Batik Sejahtera <Icon name="chevron-right" size={20} className="text-green-300 opacity-80 group-hover:opacity-100" />
+                    {namaBisnis} <Icon name="chevron-right" size={20} className="text-green-300 opacity-80 group-hover:opacity-100" />
                   </h2>
                 </div>
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-green-700 font-bold shadow-md text-lg border-2 border-transparent group-hover:border-green-200 transition overflow-hidden">
-                    {fotoProfil ? <img src={fotoProfil} alt="Profil" className="w-full h-full object-cover" /> : "BS"}
+                    {fotoProfil ? <img src={fotoProfil} alt="Profil" className="w-full h-full object-cover" /> : namaBisnis.charAt(0).toUpperCase()}
                 </div>
               </div>
               <div className="bg-white rounded-2xl p-5 flex items-center justify-between shadow-xl relative z-10">
@@ -300,14 +329,14 @@
         );
 
         // =====================================================================
-        // HALAMAN AI KAMERA (TERINTEGRASI DENGAN GEMINI AI VISION)
+        // HALAMAN AI KAMERA (CHAT UI + KAMERA INTEGRASI + ATTACHMENT)
         // =====================================================================
         const HalamanAI = ({ navigasiKe }) => {
           const [pesanChat, setPesanChat] = useState([
             { id: 1, sender: 'bot', text: 'Halo! Saya EcoBot. Silakan foto limbah Anda, lalu tanyakan kepada saya limbah tersebut cocok dijadikan produk apa!' }
           ]);
           const [inputTeks, setInputTeks] = useState('');
-          const [gambarTerlampir, setGambarTerlampir] = useState(null);
+          const [gambarTerlampir, setGambarTerlampir] = useState(null); // State baru untuk menyimpan foto sementara
           const [modeKamera, setModeKamera] = useState(false);
           const [isTyping, setIsTyping] = useState(false);
           const [kameraError, setKameraError] = useState(false);
@@ -316,11 +345,12 @@
           const streamRef = useRef(null);
           const chatEndRef = useRef(null);
 
-          // Auto-scroll ke bawah
+          // Auto-scroll ke bawah saat ada pesan baru
           useEffect(() => {
             chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
           }, [pesanChat, isTyping, gambarTerlampir]);
 
+          // Buka Kamera
           const bukaKamera = async () => {
             setModeKamera(true);
             try {
@@ -338,6 +368,7 @@
             }
           };
 
+          // Tutup Kamera
           const tutupKamera = () => {
             if (streamRef.current) {
               streamRef.current.getTracks().forEach(track => track.stop());
@@ -345,6 +376,7 @@
             setModeKamera(false);
           };
 
+          // Ambil Foto dari Video & Lampirkan (TIDAK langsung dikirim)
           const ambilFoto = () => {
             if (videoRef.current) {
               const canvas = document.createElement('canvas');
@@ -352,87 +384,62 @@
               canvas.height = videoRef.current.videoHeight;
               const ctx = canvas.getContext('2d');
               ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-              const imageUrl = canvas.toDataURL('image/jpeg'); // Menggunakan JPEG untuk ukuran lebih efisien
+              
+              // Ubah ke format gambar base64
+              const imageUrl = canvas.toDataURL('image/png');
               
               tutupKamera();
-              setGambarTerlampir(imageUrl);
+              setGambarTerlampir(imageUrl); // Simpan foto sebagai lampiran sementara
             }
           };
 
-          // FUNGSI UNTUK MEMANGGIL GEMINI API
-          const panggilGeminiAPI = async (teksPrompt, gambarBase64) => {
-            const apiKey = ""; /const apiKey = "AIzaSyBse71uhbqALNUbtBlOORUGyzJiQObnCi4";/
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-            const parts = [];
-            // Masukkan teks ke dalam parts
-            if (teksPrompt) {
-              parts.push({ text: teksPrompt });
-            } else {
-              parts.push({ text: "Analisis gambar limbah ini. Bisa didaur ulang menjadi apa saja? Berapa perkiraan nilai jualnya?" });
-            }
-
-            // Masukkan gambar ke dalam parts jika ada
-            if (gambarBase64) {
-              const base64Data = gambarBase64.split(',')[1];
-              const mimeType = gambarBase64.substring(gambarBase64.indexOf(':') + 1, gambarBase64.indexOf(';')) || "image/jpeg";
-              parts.push({
-                inlineData: { mimeType: mimeType, data: base64Data }
-              });
-            }
-
-            const payload = {
-              contents: [{ role: "user", parts: parts }],
-              systemInstruction: {
-                parts: [{ text: "Kamu adalah EcoBot, pakar daur ulang dan asisten AI di aplikasi EcoVia. Tugasmu adalah menganalisis gambar limbah atau menjawab pertanyaan tentang daur ulang. Berikan rekomendasi 2-3 produk kreatif dan bernilai ekonomi tinggi yang bisa dibuat dari limbah tersebut, estimasi harga jualnya, dan cara singkat mengolahnya. Jawablah dengan bahasa Indonesia yang ramah, profesional, ringkas, dan jelas. Hindari format markdown rumit." }]
-              }
-            };
-
-            // Implementasi Retry dengan Exponential Backoff untuk keandalan API
-            const retries = [1000, 2000, 4000, 8000];
-            for (let i = 0; i <= retries.length; i++) {
-              try {
-                const response = await fetch(url, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(payload)
-                });
-                
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const result = await response.json();
-                return result.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, saya tidak mengerti limbah tersebut.";
-              } catch (error) {
-                if (i === retries.length) {
-                  console.error("API Error:", error);
-                  return "Maaf, server AI sedang sibuk. Silakan coba lagi beberapa saat lagi.";
-                }
-                await new Promise(resolve => setTimeout(resolve, retries[i]));
-              }
-            }
-          };
-
-          const kirimPesan = async () => {
+          // Logika Mengirim Pesan & Balasan AI
+          const kirimPesan = () => {
             if (!inputTeks.trim() && !gambarTerlampir) return;
 
             const teksDikirim = inputTeks;
             const gambarDikirim = gambarTerlampir;
 
+            // Tambahkan pesan user ke chat
             const pesanBaru = { id: Date.now(), sender: 'user', text: teksDikirim, image: gambarDikirim };
             setPesanChat(prev => [...prev, pesanBaru]);
             
+            // Bersihkan input dan lampiran
             setInputTeks('');
             setGambarTerlampir(null);
-            setIsTyping(true); // Memunculkan indikator "Sedang mengetik..."
+            setIsTyping(true);
 
-            // Panggil AI Gemin Vision secara Async
-            const balasanAI = await panggilGeminiAPI(teksDikirim, gambarDikirim);
+            // Simulasi AI memproses dan membalas
+            setTimeout(() => {
+              let balasan = "";
+              const tanya = teksDikirim.toLowerCase();
 
-            // Tampilkan jawaban AI
-            setPesanChat(prev => [...prev, { id: Date.now() + 1, sender: 'bot', text: balasanAI }]);
-            setIsTyping(false);
+              if (gambarDikirim) {
+                // Jika user mengirim gambar
+                if (tanya.includes("jadikan") || tanya.includes("buat") || tanya.includes("apa")) {
+                  balasan = "Berdasarkan gambar, saya mendeteksi ini adalah limbah kain perca. Limbah ini sangat bagus diolah menjadi tas jinjing, dompet denim, atau keset estetik. Potensi harga jualnya berkisar Rp 50.000 - Rp 75.000 di Pasar Daur Ulang EcoVia!";
+                } else if (tanya.includes("jual") || tanya.includes("harga")) {
+                   balasan = "Limbah kain perca seperti di gambar bisa Anda setorkan ke mitra kami. Anda bisa menghemat biaya pembuangan, dan bahkan mendapatkan poin *Reward* yang bisa ditukar dengan uang tunai jika volumenya besar.";
+                } else {
+                  balasan = "Saya telah memproses gambar limbah tersebut. Silakan tanyakan sesuatu, misalnya: 'Bisa dijadikan apa limbah ini?'";
+                }
+              } else {
+                // Jika user hanya mengirim teks tanpa gambar
+                if (tanya.includes("plastik")) {
+                  balasan = "Plastik kemasan bisa dicacah dan dilebur menjadi pot tanaman daur ulang atau paving block ringan.";
+                } else if (tanya.includes("kardus") || tanya.includes("kertas")) {
+                  balasan = "Kardus bekas bisa dijadikan bahan pengemasan produk (*packaging*) yang estetik, atau disetor langsung untuk diolah menjadi pulp kertas.";
+                } else {
+                  balasan = "Itu ide yang menarik! Untuk hasil yang lebih akurat, coba klik ikon kamera dan fotokan limbah Anda kepada saya.";
+                }
+              }
+
+              setPesanChat(prev => [...prev, { id: Date.now() + 1, sender: 'bot', text: balasan }]);
+              setIsTyping(false);
+            }, 2000); // Jeda 2 detik agar terasa seperti AI sedang "berpikir"
           };
 
+          // Membersihkan kamera jika komponen ditutup tiba-tiba
           useEffect(() => {
             return () => {
               if (streamRef.current) {
@@ -448,12 +455,12 @@
               {!modeKamera ? (
                 /* RUANG OBROLAN (CHAT INTERFACE) */
                 <div className="flex flex-col flex-1 h-full overflow-hidden relative">
-                  <div className="flex-1 p-4 overflow-y-auto space-y-4 pb-32">
+                  <div className="flex-1 p-4 overflow-y-auto space-y-4 pb-20">
                     {pesanChat.map((p) => (
                       <div key={p.id} className={`flex ${p.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] p-3.5 rounded-2xl shadow-sm ${p.sender === 'user' ? 'bg-green-600 text-white rounded-br-none' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'}`}>
-                          {p.image && <img src={p.image} className="w-full rounded-xl mb-3 object-cover max-h-48 border border-white/20" alt="Foto Limbah" />}
-                          {p.text && <p className="text-sm leading-relaxed whitespace-pre-wrap">{p.text}</p>}
+                        <div className={`max-w-[80%] p-3 rounded-2xl shadow-sm ${p.sender === 'user' ? 'bg-green-600 text-white rounded-br-none' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'}`}>
+                          {p.image && <img src={p.image} className="w-full rounded-xl mb-2 object-cover" alt="Foto Limbah" />}
+                          {p.text && <p className="text-sm leading-relaxed">{p.text}</p>}
                         </div>
                       </div>
                     ))}
@@ -474,9 +481,9 @@
                   {/* Area Input Bawah */}
                   <div className="absolute bottom-0 w-full bg-white border-t border-gray-200 flex flex-col z-10">
                     
-                    {/* Preview Gambar Terlampir */}
+                    {/* Preview Gambar Terlampir (Muncul jika ada foto yang diambil) */}
                     {gambarTerlampir && (
-                      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center shadow-inner">
+                      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center">
                         <div className="relative inline-block">
                           <img src={gambarTerlampir} className="h-16 w-16 object-cover rounded-xl border-2 border-green-500 shadow-sm" alt="Lampiran" />
                           <button 
@@ -486,7 +493,7 @@
                             <Icon name="x" size={12} />
                           </button>
                         </div>
-                        <span className="text-xs text-gray-500 font-medium ml-3 italic">Foto terlampir, tanyakan sesuatu...</span>
+                        <span className="text-xs text-gray-500 font-medium ml-3 italic">Foto siap dikirim...</span>
                       </div>
                     )}
 
@@ -494,7 +501,7 @@
                     <div className="p-3 flex items-center gap-2">
                       <button 
                           onClick={bukaKamera} 
-                          className="p-3 bg-gray-100 text-gray-600 rounded-full hover:bg-green-100 hover:text-green-600 transition shadow-sm border border-gray-200"
+                          className="p-3 bg-gray-100 text-gray-600 rounded-full hover:bg-green-100 hover:text-green-600 transition shadow-sm"
                       >
                         <Icon name="camera" size={20} />
                       </button>
@@ -505,12 +512,11 @@
                         onKeyPress={(e) => e.key === 'Enter' && kirimPesan()}
                         placeholder={gambarTerlampir ? "Tanyakan sesuatu tentang foto ini..." : "Ketik pesan..."}
                         className="flex-1 bg-gray-100 border border-transparent rounded-full py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition"
-                        disabled={isTyping}
                       />
                       <button 
                           onClick={kirimPesan} 
-                          disabled={(!inputTeks.trim() && !gambarTerlampir) || isTyping}
-                          className={`p-3 rounded-full transition shadow-sm ${(!inputTeks.trim() && !gambarTerlampir) || isTyping ? 'bg-gray-200 text-gray-400' : 'bg-green-600 text-white hover:bg-green-700'}`}
+                          disabled={!inputTeks.trim() && !gambarTerlampir}
+                          className={`p-3 rounded-full transition shadow-sm ${(!inputTeks.trim() && !gambarTerlampir) ? 'bg-gray-200 text-gray-400' : 'bg-green-600 text-white hover:bg-green-700'}`}
                       >
                         <Icon name="send" size={18} />
                       </button>
@@ -597,7 +603,7 @@
         // =====================================================================
         // HALAMAN DETAIL PRODUK BLOCKCHAIN
         // =====================================================================
-        const HalamanDetailProduk = ({ produk, navigasiKe }) => {
+        const HalamanDetailProduk = ({ produk, navigasiKe, namaBisnis }) => {
             if (!produk) return null;
             return (
               <div className="flex flex-col h-full bg-gray-50 pb-20 overflow-y-auto">
@@ -625,7 +631,7 @@
                         <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
                           <h5 className="font-bold text-xs text-gray-800">1. Limbah Disetor</h5>
                           <p className="text-[9px] font-mono text-gray-400 mt-1 mb-1 bg-gray-50 px-2 py-0.5 rounded break-all">Tx: 0x8f4d92a1b9c23e84...</p>
-                          <p className="text-[11px] text-gray-600">Oleh: UMKM Batik Sejahtera</p>
+                          <p className="text-[11px] text-gray-600">Oleh: UMKM {namaBisnis}</p>
                         </div>
                       </div>
                       <div className="relative">
@@ -697,7 +703,7 @@
           </div>
         );
 
-        const HalamanJadwal = ({ navigasiKe }) => (
+        const HalamanJadwal = ({ navigasiKe, namaBisnis }) => (
           <div className="flex flex-col h-full bg-gray-50 pb-20">
             <HeaderNavigasi judul="Atur Penjemputan" aksiKembali={() => navigasiKe('setorLimbah')} />
             <div className="p-6 overflow-y-auto space-y-6">
@@ -708,7 +714,7 @@
                   </div>
                   <div className="flex-1">
                     <h4 className="text-xs font-bold text-gray-400 uppercase">Alamat Pengambilan</h4>
-                    <p className="text-sm font-bold text-gray-800">Gudang Produksi Batik Sejahtera</p>
+                    <p className="text-sm font-bold text-gray-800">Gudang Produksi {namaBisnis}</p>
                     <p className="text-xs text-gray-500 mt-1">Jl. Industri Kreatif No. 45, Kota Semarang</p>
                   </div>
                 </div>
@@ -806,7 +812,7 @@
           </div>
         );
 
-        const HalamanPenghargaan = () => (
+        const HalamanPenghargaan = ({namaBisnis}) => (
           <div className="flex flex-col h-full bg-gray-50 pb-20 overflow-y-auto">
             <HeaderNavigasi judul="Penghargaan" />
             <div className="p-6">
@@ -814,7 +820,7 @@
                 <div className="border-[6px] border-double border-green-200 p-8 rounded-3xl flex flex-col items-center text-center bg-gradient-to-b from-white to-green-50">
                   <div className="bg-green-100 p-3 rounded-full mb-3"><Icon name="award" size={40} className="text-green-600" /></div>
                   <p className="text-[10px] font-black text-green-700 tracking-widest uppercase mb-6">Sertifikat Keberlanjutan 2026</p>
-                  <h2 className="text-2xl font-serif font-black text-gray-900 mb-4 border-b-2 border-green-200 pb-2">Batik Sejahtera</h2>
+                  <h2 className="text-2xl font-serif font-black text-gray-900 mb-4 border-b-2 border-green-200 pb-2">{namaBisnis}</h2>
                   <div className="bg-green-600 px-5 py-2 rounded-full text-white font-bold text-xs mt-4">Total: 345 Kg Limbah</div>
                 </div>
               </div>
@@ -829,6 +835,9 @@
           const [halamanAktif, setHalamanAktif] = useState('registrasi');
           const [produkTerpilih, setProdukTerpilih] = useState(null);
           const [fotoProfil, setFotoProfil] = useState(null);
+          
+          // State baru untuk menyimpan Nama Bisnis secara global
+          const [namaBisnis, setNamaBisnis] = useState('Batik Sejahtera');
 
           const gantiHalaman = (namaHalaman) => {
             setHalamanAktif(namaHalaman);
@@ -838,7 +847,7 @@
           // Re-render ikon Lucide
           useEffect(() => {
             lucide.createIcons();
-          }, [halamanAktif, fotoProfil]);
+          }, [halamanAktif, fotoProfil, namaBisnis]);
 
           const menuBawah = [
             { id: 'dashboard', ikon: 'home', label: 'Beranda' },
@@ -854,17 +863,17 @@
           return (
             <React.Fragment>
               <div className="flex-1 overflow-hidden relative">
-                {halamanAktif === 'registrasi' && <HalamanRegistrasi navigasiKe={gantiHalaman} />}
-                {halamanAktif === 'dashboard' && <HalamanBeranda navigasiKe={gantiHalaman} fotoProfil={fotoProfil} />}
+                {halamanAktif === 'registrasi' && <HalamanRegistrasi navigasiKe={gantiHalaman} setNamaBisnis={setNamaBisnis} />}
+                {halamanAktif === 'dashboard' && <HalamanBeranda navigasiKe={gantiHalaman} fotoProfil={fotoProfil} namaBisnis={namaBisnis} />}
                 {halamanAktif === 'setorLimbah' && <HalamanSetorLimbah navigasiKe={gantiHalaman} />}
-                {halamanAktif === 'jadwal' && <HalamanJadwal navigasiKe={gantiHalaman} />}
+                {halamanAktif === 'jadwal' && <HalamanJadwal navigasiKe={gantiHalaman} namaBisnis={namaBisnis} />}
                 {halamanAktif === 'pelacakan' && <HalamanPelacakan navigasiKe={gantiHalaman} />}
                 {halamanAktif === 'marketplace' && <HalamanMarketplace navigasiKe={gantiHalaman} setProdukTerpilih={setProdukTerpilih} />}
                 {halamanAktif === 'laporan' && <HalamanLaporan />}
-                {halamanAktif === 'penghargaan' && <HalamanPenghargaan />}
+                {halamanAktif === 'penghargaan' && <HalamanPenghargaan namaBisnis={namaBisnis} />}
                 {halamanAktif === 'ai' && <HalamanAI navigasiKe={gantiHalaman} />}
-                {halamanAktif === 'detailProduk' && <HalamanDetailProduk produk={produkTerpilih} navigasiKe={gantiHalaman} />}
-                {halamanAktif === 'profil' && <HalamanProfil navigasiKe={gantiHalaman} fotoProfil={fotoProfil} setFotoProfil={setFotoProfil} />}
+                {halamanAktif === 'detailProduk' && <HalamanDetailProduk produk={produkTerpilih} navigasiKe={gantiHalaman} namaBisnis={namaBisnis} />}
+                {halamanAktif === 'profil' && <HalamanProfil navigasiKe={gantiHalaman} fotoProfil={fotoProfil} setFotoProfil={setFotoProfil} namaBisnis={namaBisnis} setNamaBisnis={setNamaBisnis} />}
               </div>
 
               {!sembunyikanMenuBawah && (
