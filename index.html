@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoVia App</title>
+    <title>CircuLab.id App</title>
     <!-- Memanggil React -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -90,7 +90,7 @@
             const [inputNama, setInputNama] = useState('');
             
             // 👇👇👇 MASUKKAN LINK URL ATAU PATH GAMBAR LOGO ANDA DI BAWAH INI 👇👇👇
-            const urlLogoAplikasi = "logo.png"; 
+            const urlLogoAplikasi = "https://ui-avatars.com/api/?name=CL&background=dcfce7&color=16a34a&rounded=true&size=128"; 
             // 👆👆👆 ========================================================= 👆👆👆
 
             const handleDaftar = (e) => {
@@ -107,7 +107,7 @@
                         {/* Tag ini menampilkan logo Anda menjadi bentuk bulat sempurna (rounded-full) */}
                         <img 
                             src={urlLogoAplikasi} 
-                            alt="Logo CircuLab" 
+                            alt="Logo CircuLab.id" 
                             className="h-24 w-24 object-cover rounded-full shadow-md border-2 border-green-100" 
                         />
                     </div>
@@ -333,7 +333,7 @@
         // =====================================================================
         const HalamanAI = ({ navigasiKe }) => {
           const [pesanChat, setPesanChat] = useState([
-            { id: 1, sender: 'bot', text: 'Halo! Saya EcoBot. Silakan foto limbah Anda, lalu tanyakan kepada saya limbah tersebut cocok dijadikan produk apa!' }
+            { id: 1, sender: 'bot', text: 'Halo! Saya CircuBot. Silakan foto limbah Anda, lalu tanyakan kepada saya limbah tersebut cocok dijadikan produk apa!' }
           ]);
           const [inputTeks, setInputTeks] = useState('');
           const [gambarTerlampir, setGambarTerlampir] = useState(null); // State baru untuk menyimpan foto sementara
@@ -417,7 +417,7 @@
               if (gambarDikirim) {
                 // Jika user mengirim gambar
                 if (tanya.includes("jadikan") || tanya.includes("buat") || tanya.includes("apa")) {
-                  balasan = "Berdasarkan gambar, saya mendeteksi ini adalah limbah kain perca. Limbah ini sangat bagus diolah menjadi tas jinjing, dompet denim, atau keset estetik. Potensi harga jualnya berkisar Rp 50.000 - Rp 75.000 di Pasar Daur Ulang EcoVia!";
+                  balasan = "Berdasarkan gambar, saya mendeteksi ini adalah limbah kain perca. Limbah ini sangat bagus diolah menjadi tas jinjing, dompet denim, atau keset estetik. Potensi harga jualnya berkisar Rp 50.000 - Rp 75.000 di Pasar Daur Ulang CircuLab.id!";
                 } else if (tanya.includes("jual") || tanya.includes("harga")) {
                    balasan = "Limbah kain perca seperti di gambar bisa Anda setorkan ke mitra kami. Anda bisa menghemat biaya pembuangan, dan bahkan mendapatkan poin *Reward* yang bisa ditukar dengan uang tunai jika volumenya besar.";
                 } else {
@@ -450,7 +450,7 @@
 
           return (
             <div className="flex flex-col h-full bg-gray-50 pb-safe">
-              <HeaderNavigasi judul="EcoBot AI" aksiKembali={() => navigasiKe('dashboard')} />
+              <HeaderNavigasi judul="CircuBot AI" aksiKembali={() => navigasiKe('dashboard')} />
 
               {!modeKamera ? (
                 /* RUANG OBROLAN (CHAT INTERFACE) */
@@ -641,7 +641,7 @@
                         <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
                           <h5 className="font-bold text-xs text-gray-800">2. Pemrosesan Daur Ulang</h5>
                           <p className="text-[9px] font-mono text-gray-400 mt-1 mb-1 bg-gray-50 px-2 py-0.5 rounded break-all">Tx: 0x3c2e19d4f8a7b6c5...</p>
-                          <p className="text-[11px] text-gray-600">Oleh: Fasilitas EcoVia Hub</p>
+                          <p className="text-[11px] text-gray-600">Oleh: Fasilitas CircuLab.id Hub</p>
                         </div>
                       </div>
                       <div className="relative">
@@ -765,7 +765,7 @@
                     <Icon name="check-circle-2" size={12} className="text-white" />
                   </div>
                   <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm ml-2">
-                    <h5 className="font-bold text-sm text-gray-800">Tiba di Fasilitas EcoVia</h5>
+                    <h5 className="font-bold text-sm text-gray-800">Tiba di Fasilitas CircuLab.id</h5>
                     <p className="text-xs text-gray-500 mt-1">15 Okt 2026, 14:30 WIB</p>
                   </div>
                 </div>
