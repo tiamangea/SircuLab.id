@@ -131,6 +131,7 @@
                             <select className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none bg-white transition" required>
                                 <option value="" disabled selected>Pilih Kategori...</option>
                                 <option value="fashion">Fashion & Konveksi</option>
+                                <option value="makanan">Makanan & Minuman</option>
                                 <option value="kerajinan">Kerajinan Tangan</option>
                                 <option value="lainnya">Lainnya</option>
                             </select>
@@ -209,7 +210,8 @@
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Kategori Usaha</label>
                     <select className="w-full text-sm font-bold text-gray-800 focus:outline-none bg-transparent outline-none appearance-none">
                       <option value="fashion">Fashion & Konveksi</option>
-                      <option value="kerajinan">Kriya</option>
+                      <option value="makanan">Makanan & Minuman</option>
+                      <option value="kerajinan">Kerajinan Tangan</option>
                       <option value="lainnya">Lainnya</option>
                     </select>
                   </div>
@@ -245,12 +247,13 @@
         };
 
         // =====================================================================
-        // HALAMAN BERANDA
+        // HALAMAN BERANDA (UPDATE: PENAMBAHAN SISTEM KOIN)
         // =====================================================================
-        const HalamanBeranda = ({ navigasiKe, fotoProfil, namaBisnis }) => (
+        const HalamanBeranda = ({ navigasiKe, fotoProfil, namaBisnis, totalKoin }) => (
           <div className="flex flex-col h-full bg-gray-50 pb-20 overflow-y-auto relative">
             <div className="bg-gradient-to-br from-green-600 to-green-800 px-6 pt-12 pb-8 rounded-b-3xl text-white shadow-lg relative overflow-hidden">
               <div className="absolute top-4 right-4 text-white opacity-10"><Icon name="leaf" size={120} /></div>
+              
               <div 
                 className="flex justify-between items-center mb-6 relative z-10 cursor-pointer group"
                 onClick={() => navigasiKe('profil')}
@@ -265,16 +268,26 @@
                     {fotoProfil ? <img src={fotoProfil} alt="Profil" className="w-full h-full object-cover" /> : namaBisnis.charAt(0).toUpperCase()}
                 </div>
               </div>
-              <div className="bg-white rounded-2xl p-5 flex items-center justify-between shadow-xl relative z-10">
-                <div>
-                  <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Limbah Terkelola</p>
+              
+              {/* KARTU STATISTIK GANDA (LIMBAH & KOIN) */}
+              <div className="bg-white rounded-2xl p-4 flex items-center justify-between shadow-xl relative z-10">
+                <div className="flex-1 border-r border-gray-100 pl-2">
+                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
+                     Limbah
+                  </p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-black text-green-600">125</span>
-                    <span className="text-sm font-bold text-gray-500">Kg</span>
+                    <span className="text-3xl font-black text-green-600">125</span>
+                    <span className="text-xs font-bold text-gray-500">Kg</span>
                   </div>
                 </div>
-                <div className="bg-green-50 p-4 rounded-full border border-green-100">
-                  <Icon name="recycle" size={36} className="text-green-500" />
+                <div className="flex-1 pl-6">
+                  <p className="text-yellow-600/80 text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
+                    CircuCoin
+                  </p>
+                  <div className="flex items-baseline gap-1.5">
+                    <Icon name="coins" size={22} className="text-yellow-500" />
+                    <span className="text-3xl font-black text-yellow-500">{totalKoin.toLocaleString('id-ID')}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -334,7 +347,7 @@
             { id: 1, sender: 'bot', text: 'Halo! Saya CircuBot. Silakan foto limbah Anda, lalu tanyakan kepada saya limbah tersebut cocok dijadikan produk apa!' }
           ]);
           const [inputTeks, setInputTeks] = useState('');
-          const [gambarTerlampir, setGambarTerlampir] = useState(null); // State baru untuk menyimpan foto sementara
+          const [gambarTerlampir, setGambarTerlampir] = useState(null); 
           const [modeKamera, setModeKamera] = useState(false);
           const [isTyping, setIsTyping] = useState(false);
           const [kameraError, setKameraError] = useState(false);
@@ -343,12 +356,10 @@
           const streamRef = useRef(null);
           const chatEndRef = useRef(null);
 
-          // Auto-scroll ke bawah saat ada pesan baru
           useEffect(() => {
             chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
           }, [pesanChat, isTyping, gambarTerlampir]);
 
-          // Buka Kamera
           const bukaKamera = async () => {
             setModeKamera(true);
             try {
@@ -366,7 +377,6 @@
             }
           };
 
-          // Tutup Kamera
           const tutupKamera = () => {
             if (streamRef.current) {
               streamRef.current.getTracks().forEach(track => track.stop());
@@ -374,7 +384,6 @@
             setModeKamera(false);
           };
 
-          // Ambil Foto dari Video & Lampirkan (TIDAK langsung dikirim)
           const ambilFoto = () => {
             if (videoRef.current) {
               const canvas = document.createElement('canvas');
@@ -383,46 +392,39 @@
               const ctx = canvas.getContext('2d');
               ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
               
-              // Ubah ke format gambar base64
               const imageUrl = canvas.toDataURL('image/png');
               
               tutupKamera();
-              setGambarTerlampir(imageUrl); // Simpan foto sebagai lampiran sementara
+              setGambarTerlampir(imageUrl); 
             }
           };
 
-          // Logika Mengirim Pesan & Balasan AI
           const kirimPesan = () => {
             if (!inputTeks.trim() && !gambarTerlampir) return;
 
             const teksDikirim = inputTeks;
             const gambarDikirim = gambarTerlampir;
 
-            // Tambahkan pesan user ke chat
             const pesanBaru = { id: Date.now(), sender: 'user', text: teksDikirim, image: gambarDikirim };
             setPesanChat(prev => [...prev, pesanBaru]);
             
-            // Bersihkan input dan lampiran
             setInputTeks('');
             setGambarTerlampir(null);
             setIsTyping(true);
 
-            // Simulasi AI memproses dan membalas
             setTimeout(() => {
               let balasan = "";
               const tanya = teksDikirim.toLowerCase();
 
               if (gambarDikirim) {
-                // Jika user mengirim gambar
                 if (tanya.includes("jadikan") || tanya.includes("buat") || tanya.includes("apa")) {
                   balasan = "Berdasarkan gambar, saya mendeteksi ini adalah limbah kain perca. Limbah ini sangat bagus diolah menjadi tas jinjing, dompet denim, atau keset estetik. Potensi harga jualnya berkisar Rp 50.000 - Rp 75.000 di Pasar Daur Ulang CircuLab.id!";
                 } else if (tanya.includes("jual") || tanya.includes("harga")) {
-                   balasan = "Limbah kain perca seperti di gambar bisa Anda setorkan ke mitra kami. Anda bisa menghemat biaya pembuangan, dan bahkan mendapatkan poin *Reward* yang bisa ditukar dengan uang tunai jika volumenya besar.";
+                   balasan = "Limbah kain perca seperti di gambar bisa Anda setorkan ke mitra kami. Anda bisa menghemat biaya pembuangan, dan bahkan mendapatkan poin *CircuCoin* yang bisa ditukar dengan uang tunai jika volumenya besar.";
                 } else {
                   balasan = "Saya telah memproses gambar limbah tersebut. Silakan tanyakan sesuatu, misalnya: 'Bisa dijadikan apa limbah ini?'";
                 }
               } else {
-                // Jika user hanya mengirim teks tanpa gambar
                 if (tanya.includes("plastik")) {
                   balasan = "Plastik kemasan bisa dicacah dan dilebur menjadi pot tanaman daur ulang atau paving block ringan.";
                 } else if (tanya.includes("kardus") || tanya.includes("kertas")) {
@@ -434,10 +436,9 @@
 
               setPesanChat(prev => [...prev, { id: Date.now() + 1, sender: 'bot', text: balasan }]);
               setIsTyping(false);
-            }, 2000); // Jeda 2 detik agar terasa seperti AI sedang "berpikir"
+            }, 2000); 
           };
 
-          // Membersihkan kamera jika komponen ditutup tiba-tiba
           useEffect(() => {
             return () => {
               if (streamRef.current) {
@@ -451,7 +452,6 @@
               <HeaderNavigasi judul="CircuBot AI" aksiKembali={() => navigasiKe('dashboard')} />
 
               {!modeKamera ? (
-                /* RUANG OBROLAN (CHAT INTERFACE) */
                 <div className="flex flex-col flex-1 h-full overflow-hidden relative">
                   <div className="flex-1 p-4 overflow-y-auto space-y-4 pb-20">
                     {pesanChat.map((p) => (
@@ -463,7 +463,6 @@
                       </div>
                     ))}
                     
-                    {/* Animasi Mengetik AI */}
                     {isTyping && (
                       <div className="flex justify-start">
                         <div className="bg-white border border-gray-200 p-4 rounded-2xl rounded-bl-none shadow-sm flex gap-1.5 items-center">
@@ -476,10 +475,7 @@
                     <div ref={chatEndRef}></div>
                   </div>
 
-                  {/* Area Input Bawah */}
                   <div className="absolute bottom-0 w-full bg-white border-t border-gray-200 flex flex-col z-10">
-                    
-                    {/* Preview Gambar Terlampir (Muncul jika ada foto yang diambil) */}
                     {gambarTerlampir && (
                       <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center">
                         <div className="relative inline-block">
@@ -495,7 +491,6 @@
                       </div>
                     )}
 
-                    {/* Baris Ketik Chat */}
                     <div className="p-3 flex items-center gap-2">
                       <button 
                           onClick={bukaKamera} 
@@ -522,7 +517,6 @@
                   </div>
                 </div>
               ) : (
-                /* MODE KAMERA FULLSCREEN */
                 <div className="flex-1 bg-black flex flex-col relative z-50">
                   <button onClick={tutupKamera} className="absolute top-4 left-4 z-20 bg-black/50 text-white p-2 rounded-full backdrop-blur-sm">
                     <Icon name="x" size={24} />
@@ -701,7 +695,8 @@
           </div>
         );
 
-        const HalamanJadwal = ({ navigasiKe, namaBisnis }) => (
+        // UPDATE: Penambahan logika penambahan koin saat penjemputan dikonfirmasi
+        const HalamanJadwal = ({ navigasiKe, namaBisnis, setTotalKoin }) => (
           <div className="flex flex-col h-full bg-gray-50 pb-20">
             <HeaderNavigasi judul="Atur Penjemputan" aksiKembali={() => navigasiKe('setorLimbah')} />
             <div className="p-6 overflow-y-auto space-y-6">
@@ -733,9 +728,20 @@
               <div className="bg-gray-100 p-5 rounded-2xl border border-gray-200 mt-6">
                 <h4 className="font-bold text-gray-800 text-sm border-b border-gray-200 pb-2 mb-3">Ringkasan Penjemputan</h4>
                 <div className="flex justify-between items-center text-sm mb-2"><span className="text-gray-500">Estimasi Berat</span><span className="font-bold text-gray-800">10 Kg</span></div>
-                <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-200"><span className="text-gray-500">Biaya Layanan</span><span className="font-black text-green-600">Gratis</span></div>
+                <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-200 mb-2"><span className="text-gray-500">Biaya Layanan</span><span className="font-black text-green-600">Gratis</span></div>
+                <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-200 bg-yellow-100/50 -mx-5 px-5 pb-1 rounded-b-2xl">
+                    <span className="text-yellow-700 font-bold flex items-center gap-1"><Icon name="coins" size={14}/> Potensi Reward</span>
+                    <span className="font-black text-yellow-600">+500 Koin</span>
+                </div>
               </div>
-              <button onClick={() => { alert('Penjemputan Dikonfirmasi!'); navigasiKe('pelacakan'); }} className="w-full bg-gray-900 text-white font-bold rounded-xl p-4 shadow-lg text-lg">
+              <button 
+                onClick={() => { 
+                    alert('Penjemputan Dikonfirmasi! Anda mendapatkan +500 CircuCoin.'); 
+                    setTotalKoin(prev => prev + 500); // Menambahkan koin secara langsung
+                    navigasiKe('pelacakan'); 
+                }} 
+                className="w-full bg-gray-900 text-white font-bold rounded-xl p-4 shadow-lg text-lg hover:bg-gray-800 transition"
+              >
                 Konfirmasi Pesanan
               </button>
             </div>
@@ -810,21 +816,141 @@
           </div>
         );
 
-        const HalamanPenghargaan = ({namaBisnis}) => (
-          <div className="flex flex-col h-full bg-gray-50 pb-20 overflow-y-auto">
-            <HeaderNavigasi judul="Penghargaan" />
-            <div className="p-6">
-              <div className="bg-white p-2.5 rounded-[2rem] shadow-lg border border-gray-200 mb-8">
-                <div className="border-[6px] border-double border-green-200 p-8 rounded-3xl flex flex-col items-center text-center bg-gradient-to-b from-white to-green-50">
-                  <div className="bg-green-100 p-3 rounded-full mb-3"><Icon name="award" size={40} className="text-green-600" /></div>
-                  <p className="text-[10px] font-black text-green-700 tracking-widest uppercase mb-6">Sertifikat Keberlanjutan 2026</p>
-                  <h2 className="text-2xl font-serif font-black text-gray-900 mb-4 border-b-2 border-green-200 pb-2">{namaBisnis}</h2>
-                  <div className="bg-green-600 px-5 py-2 rounded-full text-white font-bold text-xs mt-4">Total: 345 Kg Limbah</div>
+        // UPDATE: Halaman penghargaan sekarang menampilkan Menu Penukaran Reward
+        const HalamanPenghargaan = ({namaBisnis, totalKoin, setTotalKoin}) => {
+          const [showRedeem, setShowRedeem] = useState(false);
+
+          // Logika untuk memproses penukaran koin
+          const handleRedeem = (hargaKoin, namaVoucher) => {
+            if (totalKoin >= hargaKoin) {
+              setTotalKoin(prev => prev - hargaKoin);
+              alert(`🎉 Berhasil! Anda telah menukarkan ${hargaKoin} CircuCoin dengan ${namaVoucher}. Voucher otomatis tersimpan di akun Anda.`);
+              setShowRedeem(false);
+            } else {
+              alert(`Maaf, saldo CircuCoin Anda tidak mencukupi. Anda membutuhkan ${hargaKoin} Koin.`);
+            }
+          };
+
+          return (
+            <div className="flex flex-col h-full bg-gray-50 pb-20 overflow-y-auto relative">
+              <HeaderNavigasi judul="Reward & Pencapaian" />
+              <div className="p-6">
+                
+                {/* Saldo Koin Card */}
+                <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-3xl p-6 text-white shadow-lg mb-8 relative overflow-hidden">
+                  <Icon name="coins" size={100} className="absolute -right-4 -bottom-4 opacity-20" />
+                  <p className="text-sm font-bold opacity-90 mb-1">Total Saldo Koin</p>
+                  <h2 className="text-4xl font-black mb-4 flex items-center gap-2">
+                      {totalKoin.toLocaleString('id-ID')} <span className="text-lg font-bold">CC</span>
+                  </h2>
+                  <button 
+                    onClick={() => setShowRedeem(true)}
+                    className="bg-white text-yellow-600 text-sm font-bold py-2.5 px-6 rounded-full shadow-md hover:scale-105 transition active:scale-95 relative z-10"
+                  >
+                      Tukarkan Koin
+                  </button>
+                </div>
+
+                <h3 className="font-bold text-gray-800 mb-4 text-lg">Sertifikat Anda</h3>
+                <div className="bg-white p-2.5 rounded-[2rem] shadow-sm border border-gray-200 mb-8">
+                  <div className="border-[6px] border-double border-green-200 p-8 rounded-3xl flex flex-col items-center text-center bg-gradient-to-b from-white to-green-50">
+                    <div className="bg-green-100 p-3 rounded-full mb-3"><Icon name="award" size={40} className="text-green-600" /></div>
+                    <p className="text-[10px] font-black text-green-700 tracking-widest uppercase mb-6">Sertifikat Keberlanjutan 2026</p>
+                    <h2 className="text-2xl font-serif font-black text-gray-900 mb-4 border-b-2 border-green-200 pb-2">{namaBisnis}</h2>
+                    <div className="bg-green-600 px-5 py-2 rounded-full text-white font-bold text-xs mt-4">Pahlawan Lingkungan</div>
+                  </div>
                 </div>
               </div>
+
+              {/* MENU POP-UP TUKAR KOIN (BOTTOM SHEET) */}
+              {showRedeem && (
+                <div className="absolute inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-sm transition-opacity">
+                  <div className="bg-white rounded-t-3xl p-6 pb-12 shadow-2xl animate-[slideUp_0.3s_ease-out]">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="font-bold text-xl text-gray-800 flex items-center gap-2">
+                        <Icon name="gift" className="text-yellow-500" /> Tukar CircuCoin
+                      </h3>
+                      <button onClick={() => setShowRedeem(false)} className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition">
+                        <Icon name="x" size={20} />
+                      </button>
+                    </div>
+                    
+                    <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-2xl mb-6 flex justify-between items-center shadow-inner">
+                      <span className="font-semibold text-yellow-800 text-sm">Saldo Anda:</span>
+                      <span className="font-black text-xl text-yellow-600 flex items-center gap-1">
+                        <Icon name="coins" size={20}/> {totalKoin.toLocaleString('id-ID')}
+                      </span>
+                    </div>
+
+                    <p className="text-xs font-bold text-gray-400 uppercase mb-3 px-1">Pilih Voucher Penukaran</p>
+                    
+                    <div className="space-y-3">
+                      {/* Opsi 1: Gratis Ongkir Logistik */}
+                      <div className="border border-gray-200 rounded-2xl p-4 flex gap-4 items-center bg-white shadow-sm hover:border-blue-300 transition">
+                        <div className="bg-blue-100 p-3 rounded-full text-blue-600">
+                          <Icon name="truck" size={24} />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-800 text-sm">Gratis Ongkir Penjemputan</h4>
+                          <p className="text-[10px] text-gray-500 mt-0.5">Potongan biaya penjemputan limbah</p>
+                        </div>
+                        <button 
+                          onClick={() => handleRedeem(300, 'Voucher Gratis Ongkir')} 
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition active:scale-95 whitespace-nowrap"
+                        >
+                          300 Koin
+                        </button>
+                      </div>
+
+                      {/* Opsi 2: Diskon Belanja Pasar Daur Ulang */}
+                      <div className="border border-gray-200 rounded-2xl p-4 flex gap-4 items-center bg-white shadow-sm hover:border-green-300 transition">
+                        <div className="bg-green-100 p-3 rounded-full text-green-600">
+                          <Icon name="shopping-bag" size={24} />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-800 text-sm">Diskon Belanja Rp 15.000</h4>
+                          <p className="text-[10px] text-gray-500 mt-0.5">Potongan harga di Pasar Daur Ulang</p>
+                        </div>
+                        <button 
+                          onClick={() => handleRedeem(600, 'Voucher Diskon Rp 15.000')} 
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition active:scale-95 whitespace-nowrap"
+                        >
+                          600 Koin
+                        </button>
+                      </div>
+                      
+                      {/* Opsi 3: Diskon Premium */}
+                      <div className="border border-gray-200 rounded-2xl p-4 flex gap-4 items-center bg-white shadow-sm hover:border-purple-300 transition">
+                        <div className="bg-purple-100 p-3 rounded-full text-purple-600">
+                          <Icon name="tag" size={24} />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-800 text-sm">Diskon Produk 50%</h4>
+                          <p className="text-[10px] text-gray-500 mt-0.5">Klaim potongan setengah harga!</p>
+                        </div>
+                        <button 
+                          onClick={() => handleRedeem(1200, 'Voucher Diskon 50%')} 
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition active:scale-95 whitespace-nowrap"
+                        >
+                          1200 Koin
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* TOMBOL KEMBALI / BATAL */}
+                    <button 
+                      onClick={() => setShowRedeem(false)} 
+                      className="w-full mt-5 bg-gray-100 text-gray-600 font-bold text-sm py-3.5 rounded-xl hover:bg-gray-200 transition active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      Kembali
+                    </button>
+
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        );
+          );
+        };
 
         // =====================================================================
         // KOMPONEN UTAMA (APP)
@@ -834,8 +960,9 @@
           const [produkTerpilih, setProdukTerpilih] = useState(null);
           const [fotoProfil, setFotoProfil] = useState(null);
           
-          // State baru untuk menyimpan Nama Bisnis secara global
           const [namaBisnis, setNamaBisnis] = useState('Batik Sejahtera');
+          // STATE BARU: Menyimpan jumlah koin (default 1.250 koin)
+          const [totalKoin, setTotalKoin] = useState(1250);
 
           const gantiHalaman = (namaHalaman) => {
             setHalamanAktif(namaHalaman);
@@ -845,14 +972,14 @@
           // Re-render ikon Lucide
           useEffect(() => {
             lucide.createIcons();
-          }, [halamanAktif, fotoProfil, namaBisnis]);
+          }, [halamanAktif, fotoProfil, namaBisnis, totalKoin]);
 
           const menuBawah = [
             { id: 'dashboard', ikon: 'home', label: 'Beranda' },
             { id: 'marketplace', ikon: 'shopping-bag', label: 'Pasar' },
             { id: 'setorLimbah', ikon: 'recycle', label: 'Setor', spesial: true },
             { id: 'laporan', ikon: 'bar-chart-2', label: 'Laporan' },
-            { id: 'penghargaan', ikon: 'award', label: 'Reward' },
+            { id: 'penghargaan', ikon: 'gift', label: 'Reward' }, // Ikon diubah jadi gift
           ];
 
           // Daftar halaman yang tidak menampilkan navigasi bawah
@@ -862,13 +989,13 @@
             <React.Fragment>
               <div className="flex-1 overflow-hidden relative">
                 {halamanAktif === 'registrasi' && <HalamanRegistrasi navigasiKe={gantiHalaman} setNamaBisnis={setNamaBisnis} />}
-                {halamanAktif === 'dashboard' && <HalamanBeranda navigasiKe={gantiHalaman} fotoProfil={fotoProfil} namaBisnis={namaBisnis} />}
+                {halamanAktif === 'dashboard' && <HalamanBeranda navigasiKe={gantiHalaman} fotoProfil={fotoProfil} namaBisnis={namaBisnis} totalKoin={totalKoin} />}
                 {halamanAktif === 'setorLimbah' && <HalamanSetorLimbah navigasiKe={gantiHalaman} />}
-                {halamanAktif === 'jadwal' && <HalamanJadwal navigasiKe={gantiHalaman} namaBisnis={namaBisnis} />}
+                {halamanAktif === 'jadwal' && <HalamanJadwal navigasiKe={gantiHalaman} namaBisnis={namaBisnis} setTotalKoin={setTotalKoin} />}
                 {halamanAktif === 'pelacakan' && <HalamanPelacakan navigasiKe={gantiHalaman} />}
                 {halamanAktif === 'marketplace' && <HalamanMarketplace navigasiKe={gantiHalaman} setProdukTerpilih={setProdukTerpilih} />}
                 {halamanAktif === 'laporan' && <HalamanLaporan />}
-                {halamanAktif === 'penghargaan' && <HalamanPenghargaan namaBisnis={namaBisnis} />}
+                {halamanAktif === 'penghargaan' && <HalamanPenghargaan namaBisnis={namaBisnis} totalKoin={totalKoin} setTotalKoin={setTotalKoin} />}
                 {halamanAktif === 'ai' && <HalamanAI navigasiKe={gantiHalaman} />}
                 {halamanAktif === 'detailProduk' && <HalamanDetailProduk produk={produkTerpilih} navigasiKe={gantiHalaman} namaBisnis={namaBisnis} />}
                 {halamanAktif === 'profil' && <HalamanProfil navigasiKe={gantiHalaman} fotoProfil={fotoProfil} setFotoProfil={setFotoProfil} namaBisnis={namaBisnis} setNamaBisnis={setNamaBisnis} />}
